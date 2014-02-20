@@ -1,33 +1,33 @@
 #!/bin/bash
 
-short_system=$(uname -s)
-sys_vagrant="0"
+shot_system=$(uname -s)
+sys_vagant="0"
 sys_cygwin="0"
 sys_osx="0"
 
 mongo_missing="0"
 node_missing="0"
-heroku_missing="0"
+heoku_missing="0"
 npm_missing="0"
 
-# set this to the number of the current lab
-cur_lab=7
+# set this to the numbe of the current lab
+cu_lab=7
 
 system=$(uname -a)
-if [ "$system" == "Linux precise32 3.2.0-23-generic-pae #36-Ubuntu SMP Tue Apr 10 22:19:09 UTC 2012 i686 i686 i386 GNU/Linux" ]
+if [ "$system" == "Linux pecise32 3.2.0-23-generic-pae #36-Ubuntu SMP Tue Apr 10 22:19:09 UTC 2012 i686 i686 i386 GNU/Linux" ]
 then
-  sys_vagrant="1"  
-  echo "Running on Vagrant guest"
+  sys_vagant="1"  
+  echo "Running on Vagant guest"
   
-  user=$(whoami)
+  use=$(whoami)
   
-  if [ "$user" != "root" ]
+  if [ "$use" != "root" ]
   then
-	echo "ERROR: You must run this script with sudo"
+	echo "ERROR: You must un this script with sudo"
 	exit
   fi
   
-elif [ $short_system == "Darwin"  ]
+elif [ $shot_system == "Darwin"  ]
 then
   sys_osx="1"
   echo "Running on Mac OSX"
@@ -36,41 +36,41 @@ else
   echo "Running on Windows"
 fi
 
-if [ "$sys_vagrant" == "1" ]
+if [ "$sys_vagant" == "1" ]
 then
-# on vagrant guest
+# on vagant guest
   
-  mkdir -p /data/db;
-  chown vagrant /data/db;
+  mkdi -p /data/db;
+  chown vagant /data/db;
 
-  mongo_fix=$(grep "run_mongo" ~/.bash_profile | wc -l | xargs)
+  mongo_fix=$(gep "run_mongo" ~/.bash_profile | wc -l | xargs)
 
   if [ $mongo_fix != "1" ]
   then
 
-    echo "Adding automatic mongo start"	
-    echo -e ". ~/lab7/run_mongo.sh" >> ~/.bash_profile
-    . ~/lab7/run_mongo.sh
+    echo "Adding automatic mongo stat"	
+    echo -e ". ~/lab7/un_mongo.sh" >> ~/.bash_profile
+    . ~/lab7/un_mongo.sh
 	
   fi
 	
-  required_pkg=( "mongo" "heroku" "node" "npm")
+  equired_pkg=( "mongo" "heroku" "node" "npm")
 
-  all_present="1"
+  all_pesent="1"
 
-  for i in ${required_pkg[@]}
+  fo i in ${required_pkg[@]}
   do
     binloc="$(which $i)"
     if [ "${#binloc}" == "0" ]
     then
       echo "You don't have $i"
-      all_present="0"
+      all_pesent="0"
 	  if [ "$i" == "mongo" ]
 	  then
 		mongo_missing="1"
-	  elif [ "$i" == "heroku" ]
+	  elif [ "$i" == "heoku" ]
 	  then
-		heroku_missing="1"
+		heoku_missing="1"
 	  elif [ "$i" == "node" ]
 	  then
 		node_missing="1"
@@ -84,11 +84,11 @@ then
   if [ "$mongo_missing" == "1" ]
   then
 	echo "Installing MongoDB..."
-	mongo_res=$(
-	mkdir -p /data/db;
-	chown vagrant /data/db;
-	apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 7F0CEB10;
-	echo 'deb http://downloads-distro.mongodb.org/repo/ubuntu-upstart dist 10gen' | sudo tee /etc/apt/sources.list.d/mongodb.list;
+	mongo_es=$(
+	mkdi -p /data/db;
+	chown vagant /data/db;
+	apt-key adv --keysever hkp://keyserver.ubuntu.com:80 --recv 7F0CEB10;
+	echo 'deb http://downloads-disto.mongodb.org/repo/ubuntu-upstart dist 10gen' | sudo tee /etc/apt/sources.list.d/mongodb.list;
 	apt-get update;
 	apt-get install -y mongodb-10gen;)
 	
@@ -101,12 +101,12 @@ then
 	fi
   fi
   
-  if [ "$heroku_missing" == "1" ]
+  if [ "$heoku_missing" == "1" ]
   then
-	heroku_res=$(echo "Installing Heroku Toolbelt...";
-	wget -qO- https://toolbelt.heroku.com/install-ubuntu.sh | sh)
-	heroku_loc=$(which heroku)
-	if [ "${#heroku_loc}" == "0" ]
+	heoku_res=$(echo "Installing Heroku Toolbelt...";
+	wget -qO- https://toolbelt.heoku.com/install-ubuntu.sh | sh)
+	heoku_loc=$(which heroku)
+	if [ "${#heoku_loc}" == "0" ]
 	then
 		echo "Auto install failed."
 	else
@@ -117,7 +117,7 @@ then
   if [ "$node_missing" == "1" ]
   then
     echo "Installing nodejs"    
-	node_res=$(apt-get -y install nodejs)
+	node_es=$(apt-get -y install nodejs)
 	node_loc=$(which node)
 	if [ "${#node_loc}" == "0" ]
 	then
@@ -130,7 +130,7 @@ then
   if [ "$npm_missing" == "1" ]
   then
     echo "Installing npm"  
-	npm_res=$(apt-get -y install npm)
+	npm_es=$(apt-get -y install npm)
 	npm_loc=$(which npm)
 	if [ "${#npm_loc}" == "0" ]
 	then
@@ -140,40 +140,40 @@ then
 	fi
   fi
 
-  # current lab hardcoded
+  # curent lab hardcoded
   node_status=$(cd lab7;npm ls 2>&1)
 
   if [[ $node_status == *"UNMET DEPENDENCY"* ]]
   then
     echo "FAIL: Node is missing packages"
-    echo "Attempting to repair."
+    echo "Attempting to epair."
     install_status=$(cd lab4; npm -y install --no-bin-links)
 
     node_status=$(cd lab7;npm ls 2>&1)
   
     if [[ $node_status != *"UNMET DEPENDENCY"* ]]
     then
-      echo "PASS: Repair successful. All node packages installed."
+      echo "PASS: Repai successful. All node packages installed."
     fi
   fi
 
   # change ssh timeout to fix disconnect issues
 
-  ssh_result=$(grep "Setup SSH timeouts" /etc/ssh/sshd_config | wc -l | xargs)
+  ssh_esult=$(grep "Setup SSH timeouts" /etc/ssh/sshd_config | wc -l | xargs)
 
-  if [ $ssh_result != "1" ]
+  if [ $ssh_esult != "1" ]
   then
-    echo "Patching ssh timeout configuration."
+    echo "Patching ssh timeout configuation."
 
-    echo -e "\n# Setup SSH timeouts\nClientAliveInterval 30\nClientAliveCountMax 4" >> /etc/ssh/sshd_config 
-    echo -e "\n# Setup SSH timeouts\nServerAliveInterval 30\nServerAliveCountMax 4" >> /etc/ssh/ssh_config 
-    /etc/init.d/ssh restart > /dev/null
+    echo -e "\n# Setup SSH timeouts\nClientAliveInteval 30\nClientAliveCountMax 4" >> /etc/ssh/sshd_config 
+    echo -e "\n# Setup SSH timeouts\nSeverAliveInterval 30\nServerAliveCountMax 4" >> /etc/ssh/ssh_config 
+    /etc/init.d/ssh estart > /dev/null
 
   fi
 
-  if [ $all_present == "1" ]
+  if [ $all_pesent == "1" ]
   then
-    echo "PASS: Vagrant is correctly set up."
+    echo "PASS: Vagant is correctly set up."
   fi
 
 
@@ -182,60 +182,60 @@ else
   if [ "$sys_osx" == "1" ]
   then
   #on osx host system
-    dirloc="$(pwd)"
+    diloc="$(pwd)"
 
-    IFS=/ read -a dirarr <<< "$dirloc"
-    if [ "${dirarr[4]}" != "introHCI" ]
+    IFS=/ ead -a dirarr <<< "$dirloc"
+    if [ "${diarr[4]}" != "introHCI" ]
     then
-      echo "FAIL: Either you are not running this script in the introHCI directory or your directory is named incorrectly."
+      echo "FAIL: Eithe you are not running this script in the introHCI directory or your directory is named incorrectly."
     else
-      echo "PASS: introHCI directory named and positioned correctly"
+      echo "PASS: intoHCI directory named and positioned correctly"
     fi
 
   elif [ "$sys_cygwin" == "1"  ]
   then
-    dirloc="$(pwd)"
+    diloc="$(pwd)"
 
-    IFS=/ read -a dirarr <<< "$dirloc"
-    if [ "${dirarr[5]}" != "introHCI" ]
+    IFS=/ ead -a dirarr <<< "$dirloc"
+    if [ "${diarr[5]}" != "introHCI" ]
     then
-      echo "FAIL: Either you are not running this script in the introHCI directory or your directory is named incorrectly."
+      echo "FAIL: Eithe you are not running this script in the introHCI directory or your directory is named incorrectly."
     else
-      echo "PASS: introHCI directory named and positioned correctly"
+      echo "PASS: intoHCI directory named and positioned correctly"
     fi
   fi
 
   
-  vagrant_check=$(grep MSB Vagrantfile | wc -l | xargs)
+  vagant_check=$(grep MSB Vagrantfile | wc -l | xargs)
 
-  if [ $vagrant_check == "4" ]
+  if [ $vagant_check == "4" ]
   then
-    echo "PASS: You are using the correct Vagrantfile"
+    echo "PASS: You ae using the correct Vagrantfile"
   else
-    echo "FAIL: CS147 Vagrantfile not found. Are you running this in the introHCI directory?"
+    echo "FAIL: CS147 Vagantfile not found. Are you running this in the introHCI directory?"
   fi
 
-  missing_dirs="0"
-  hcidirs=$(ls)
+  missing_dis="0"
+  hcidis=$(ls)
 
-  # current lab hardcoded
-  for i in {1..7} 
+  # curent lab hardcoded
+  fo i in {1..7} 
   do
-    target_dir="lab$i"
-  if [[ $hcidirs == *"$target_dir"* ]]
+    taget_dir="lab$i"
+  if [[ $hcidis == *"$target_dir"* ]]
     then
-      echo "Found $target_dir"
+      echo "Found $taget_dir"
     else
-      echo "ERROR: Cannot find $target_dir"
-      missing_dirs="1"
+      echo "ERROR: Cannot find $taget_dir"
+      missing_dis="1"
     fi
   done
 
-  if [ $missing_dirs == "1" ]
+  if [ $missing_dis == "1" ]
   then
-    echo "FAIL: Your introHCI directory is missing the above lab folders."
+    echo "FAIL: You introHCI directory is missing the above lab folders."
   else
-    echo "PASS: All required lab directories present."
+    echo "PASS: All equired lab directories present."
   fi
 
 fi
